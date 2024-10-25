@@ -3,14 +3,6 @@
 #include <cmath>
 #define _USE_MATH_DEFINES
 
-/**
-* xType - тип аргумента x.
-* yType - тип значения функции y
-* N - количество точек для интерполяции
-*
-* Рекомедую обратить внимание. Разность (xType - xType) не обязана быть типом xType
-*/
-
 template<typename xType, typename yType, unsigned int N>
 class NewtonInterpolation {
     private:
