@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <typeinfo>
 #define _USE_MATH_DEFINES
 
 template<typename xType, typename yType, unsigned int N>
@@ -11,14 +12,15 @@ class NewtonInterpolation {
     std::array<yType, N> div_difs;
     public:
     void NewtonInterpolator(const std::array<xType, N> &points, const std::array<yType, N>& values) noexcept {
-        for (unsigned long int i = 0; i < N; ++i) {
-            xs[i] = points[i];
-            div_difs[i] = 0;
-            for (unsigned long int k = 0; k <= i; ++k) {
-                long double denominator = 1;
-                for (unsigned long int n = 0; (n <= i) && (n != k); ++n)
-                    denominator *= (points[k] - points[n]);
-                div_difs[i] += values[k] / denominator;
+        for (unsigned long int n = 0; n < N; ++n) {
+            xs[n] = points[n];
+            div_difs[n] = 0.;
+            for (unsigned long int j = 0; j <= n; ++j) {
+                long double denominator = 1.;
+                for (unsigned long int i = 0; i <= n ; ++i)
+                    if (i != j)
+                        denominator *= (points[j] - points[i]);
+                div_difs[n] += values[j] / denominator;
             }
         }
     };
@@ -39,7 +41,8 @@ int main () {
     std::array<std::pair<long double, long double>, 6> line_segments {std::make_pair(0., 2.),    std::make_pair(0., 1.),
                                                                       std::make_pair(0., 1./2.), std::make_pair(0., 1./4.),
                                                                       std::make_pair(0., 1./8.), std::make_pair(0., 1./16.)};
-    
+
+
     // построение равномерного распределения узлов для каждого отрезка
     std::array<std::array<long double, N>, 6> Uniform_distribution_nodes;
     for (unsigned long int i = 0; i < line_segments.size(); ++i) {
@@ -54,8 +57,11 @@ int main () {
 
     std::array<std::array<long double, N>, 6> Uniform_distribution_values;
     for (unsigned long int i = 0; i < line_segments.size(); ++i)
-        for (unsigned long j = 0; j < N; ++j)
+        for (unsigned long j = 0; j < N; ++j) {
             Uniform_distribution_values[i][j] = fun(Uniform_distribution_nodes[i][j]);
+            // std::cout << Uniform_distribution_values[i][j] << " ";
+        }
+        // std::cout << std::endl;
 
     // построение Чебышевского распределения узлов для каждого отрезка
     std::array<std::array<long double, N>, 6> Chebyshev_nodes;
@@ -88,8 +94,8 @@ int main () {
         NewtonInterpolation<long double, long double, N> Uniform_distribution;
         NewtonInterpolation<long double, long double, N> Chebyshev;
 
-        std::reverse(Uniform_distribution_nodes[i].begin(), Uniform_distribution_nodes[i].end());
-        std::reverse(Uniform_distribution_values[i].begin(), Uniform_distribution_values[i].end());
+        // std::reverse(Chebyshev_nodes[i].begin(), Chebyshev_nodes[i].end());
+        // std::reverse(Chebyshev_values[i].begin(), Chebyshev_values[i].end());
 
         Uniform_distribution.NewtonInterpolator(Uniform_distribution_nodes[i], Uniform_distribution_values[i]);
         Chebyshev.NewtonInterpolator(Chebyshev_nodes[i], Chebyshev_values[i]);
